@@ -1,6 +1,12 @@
 import { Document, Model, Schema, Types, model } from 'mongoose';
 import TrackModel, { TrackWithoutRecord, Track } from './Track';
 
+const formats = [
+  'LP',
+  'EP',
+  'Single',
+];
+
 const schema = new Schema<DiscRecordDocument, DiscRecordModel>({
   title: {
     type: String,
@@ -13,6 +19,11 @@ const schema = new Schema<DiscRecordDocument, DiscRecordModel>({
   label: String,
   year: Number,
   coverImg: String,
+  format: {
+    type: String,
+    enum: formats,
+  },
+  discSize: Number,
   tempo: Number,
   styles: [String],
   notes: String,
@@ -24,15 +35,17 @@ const schema = new Schema<DiscRecordDocument, DiscRecordModel>({
 export interface DiscRecord {
   title: string;
   artists: Array<string>;
-  label: string;
-  year: number;
-  coverImg: string;
-  tempo: number;
-  styles: Array<string>;
-  notes: string;
+  label?: string;
+  year?: number;
+  coverImg?: string;
+  format?: string;
+  discSize?: number;
+  tempo?: number;
+  styles?: Array<string>;
+  notes?: string;
 };
 
-interface DiscRecordWithTracks extends DiscRecord {
+export interface DiscRecordWithTracks extends DiscRecord {
   tracks: Array<TrackWithoutRecord>;
 }
 
@@ -42,7 +55,8 @@ export interface DiscRecordDocument extends DiscRecord, Document {
 };
 
 export interface DiscRecordModel extends Model<DiscRecordDocument> {
-  populateTracks(id: string): Promise<DiscRecordWithTracks>
+  populateTracks(id: string): Promise<DiscRecordWithTracks>;
+  formats(): Array<string>;
 };
 
 schema.statics.populateTracks = async function(
@@ -65,5 +79,7 @@ schema.statics.populateTracks = async function(
 
   return populated;
 }
+
+schema.statics.formats = () => formats;
 
 export default model<DiscRecordDocument, DiscRecordModel>('discrecord', schema);

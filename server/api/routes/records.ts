@@ -1,7 +1,9 @@
 import {Router} from 'express';
+import config from '../../config';
 
-import DiscRecordModel from '../db/models/DiscRecord';
-import TrackModel from '../db/models/Track';
+import DiscRecordModel, { DiscRecordWithTracks } from '../../db/models/DiscRecord';
+import TrackModel from '../../db/models/Track';
+import Discogs from '../modules/discogs';
 
 const router = Router();
 
@@ -25,19 +27,40 @@ router.get('/record/:recordID', async (req, res) => {
   return res.json(record);
 });
 
-router.post('/record', async (req, res) => {
-  const {tracks, ...body} = req.body;
+const createRecord = async (body: any): Promise<DiscRecordWithTracks> => {
+  const {tracks, ...record} = body;
 
   const created = await DiscRecordModel
-    .create(body);
+    .create(record);
 
   await TrackModel
     .upsertTracks(created._id, tracks);
 
-  const record = await DiscRecordModel
+  return DiscRecordModel
     .populateTracks(created._id);
+}
+
+router.post('/record', async (req, res) => {
+  const record = await createRecord(req.body);
 
   return res.json(record);
+});
+
+router.post('/record/discogs', async (req, res) => {
+  const {releaseUrl} = req.body;
+
+  if (! releaseUrl) {
+    throw new Error('Please provide a release URL');
+  }
+
+  const discogs = new Discogs(config.discogs.token);
+
+  const record = await discogs
+    .fetchRecord(releaseUrl);
+
+  const recordDoc = await createRecord(record);
+
+  return res.json(recordDoc);
 });
 
 router.put('/record/:recordID', async (req, res) => {

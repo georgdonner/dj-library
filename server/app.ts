@@ -2,7 +2,7 @@ require('dotenv').config();
 import express from 'express';
 
 import connect from './db/connect';
-import api from './api/index';
+import api from './api/routes/index';
 
 const app = express();
 const port: number = Number(process.env.PORT) || 3100;

@@ -11,8 +11,12 @@ const schema = new Schema<TrackDocument, TrackModel>({
     ref: 'DiscRecord',
     required: true
   },
-  length: Number,
-  side: Number,
+  duration: Number,
+  side: {
+    required: true,
+    type: Number,
+    default: 0,
+  },
   bpm: Number,
 }, {
   versionKey: false,
@@ -21,9 +25,9 @@ const schema = new Schema<TrackDocument, TrackModel>({
 
 export interface TrackWithoutRecord {
   title: string;
-  length: number;
+  duration?: number;
   side: number;
-  bpm: number;
+  bpm?: number;
 };
 
 export interface Track extends TrackWithoutRecord {
