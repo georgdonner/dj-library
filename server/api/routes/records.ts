@@ -2,8 +2,9 @@ import {Router} from 'express';
 import config from '../../config';
 
 import DiscRecordModel, { DiscRecordWithTracks } from '../../db/models/DiscRecord';
-import TrackModel from '../../db/models/Track';
+import TrackModel, { TrackDocument } from '../../db/models/Track';
 import Discogs from '../modules/discogs';
+import Spotify from '../modules/spotify';
 
 const router = Router();
 
@@ -72,6 +73,28 @@ router.put('/record/:recordID', async (req, res) => {
 
   await DiscRecordModel
     .findByIdAndUpdate(recordID, record);
+
+  const updated = await DiscRecordModel
+    .populateTracks(recordID);
+
+  return res.json(updated);
+});
+
+router.put('/record/:recordID/bpm', async (req, res) => {
+  const {recordID} = req.params;
+  const {albumID} = req.body;
+
+  const tracks: TrackDocument[] = await TrackModel
+    .find({
+      record: recordID,
+    });
+
+  const spotify = new Spotify();
+  await spotify.init();
+  const populated = await spotify.populateBpm(tracks, albumID);
+
+  await TrackModel
+    .upsertTracks(recordID, populated);
 
   const updated = await DiscRecordModel
     .populateTracks(recordID);
