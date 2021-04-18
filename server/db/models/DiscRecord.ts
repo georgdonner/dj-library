@@ -54,8 +54,15 @@ export interface DiscRecordDocument extends DiscRecord, Document {
   styles: Types.Array<string>;
 };
 
+type QueryOptions = {
+  q?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface DiscRecordModel extends Model<DiscRecordDocument> {
   populateTracks(id: string): Promise<DiscRecordWithTracks>;
+  query(options: QueryOptions): Promise<Array<DiscRecord>>;
   formats(): Array<string>;
 };
 
@@ -78,6 +85,52 @@ schema.statics.populateTracks = async function(
   };
 
   return populated;
+}
+
+schema.statics.query = async function(
+  this: Model<DiscRecordDocument>,
+  options: QueryOptions,
+): Promise<Array<DiscRecord>> {
+
+  const {
+    q, page=0, limit=20,
+  } = options;
+  const pipeline = [];
+  
+  if (q) {
+    const escaped = q.replace(/[-[\]{}()/*+?.\\^$|]/g, '\\$&');
+    const regex = new RegExp(escaped, 'i');
+
+    pipeline.push(...[
+      {$lookup: {
+        from: TrackModel.collection.name,
+        localField: '_id',
+        foreignField: 'record',
+        as: 'tracks',
+      }},
+      {$match: {
+        $or: [
+          {artists: regex},
+          {styles: regex},
+          {title: regex},
+          {label: regex},
+          {'tracks.title': regex},
+        ]
+      }},
+      {$project: {
+        tracks: 0,
+      }}
+    ]);
+  }
+
+  const records: Array<DiscRecord> = await this
+    .aggregate([
+      ...pipeline,
+      {$skip: limit * page},
+      {$limit: limit},
+    ]);
+
+  return records;
 }
 
 schema.statics.formats = () => formats;
