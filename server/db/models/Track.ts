@@ -1,5 +1,5 @@
 import { Document, Model, Schema, Types, model } from 'mongoose';
-import { DiscRecordDocument } from './DiscRecord';
+import DiscRecordModel, { DiscRecordDocument } from './DiscRecord';
 
 const schema = new Schema<TrackDocument, TrackModel>({
   title: {
@@ -40,8 +40,17 @@ export interface TrackDocument extends TrackBaseDocument {
   record: DiscRecordDocument['_id'];
 }
 
+type QueryOptions = {
+  q?: string;
+  style?: string;
+  bpm?: Array<number>;
+  page?: number;
+  limit?: number;
+}
+
 export interface TrackModel extends Model<TrackDocument> {
   upsertTracks(recordID: string, tracks: Array<TrackDocument>): Promise<void>;
+  query(options: QueryOptions): Promise<Array<TrackDocument>>;
 };
 
 schema.statics.upsertTracks = async function(
@@ -90,6 +99,70 @@ schema.statics.upsertTracks = async function(
       _id: { $in: deletes },
     });
   }
+}
+
+schema.statics.query = async function(
+  this: Model<TrackDocument>,
+  options: QueryOptions,
+): Promise<Array<TrackDocument>> {
+
+  const {
+    q='', style, bpm, page=0, limit=20,
+  } = options;
+
+  const pipeline: Array<any> = [
+    {$lookup: {
+      from: DiscRecordModel.collection.name,
+      localField: 'record',
+      foreignField: '_id',
+      as: 'record',
+    }},
+    {$unwind: '$record'},
+  ];
+  
+  if (q || style || bpm?.length) {
+    const $match: any = {};
+    
+    const terms = q.split(';');
+    const regexTerms = terms.map((term) => {
+      const escaped = term
+        .trim()
+        .replace(/[-[\]{}()/*+?.\\^$|]/g, '\\$&');
+      return new RegExp(escaped, 'i');
+    });
+
+    if (regexTerms.length) {
+      $match.$and = regexTerms.map(regex => ({
+        $or: [
+          {title: regex},
+          {'record.artists': regex},
+          {'record.title': regex},
+          {'record.label': regex},
+        ],
+      }));
+    }
+    if (style) {
+      $match['record.styles'] = style;
+    }
+    if (bpm?.length === 2) {
+      bpm.sort((a,b) => a - b);
+      $match.$and = ($match.$and || []).concat([
+        {bpm: {$gte: bpm[0]}},
+        {bpm: {$lte: bpm[1]}},
+      ]);
+    }
+
+    pipeline.push({ $match });
+  }
+
+  const tracks: Array<TrackDocument> = await this
+    .aggregate([
+      ...pipeline,
+      {$skip: limit * page},
+      {$limit: limit},
+    ]);
+
+  return tracks;
 }
 
 export default model<TrackDocument, TrackModel>('track', schema);

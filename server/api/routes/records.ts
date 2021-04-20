@@ -9,11 +9,12 @@ import Spotify from '../modules/spotify';
 const router = Router();
 
 router.get('/records', async (req, res) => {
-  const {limit, page, q} = req.query;
+  const {limit, page, q, style} = req.query;
 
   const records = await DiscRecordModel
     .query({
       q: q ? String(q) : undefined,
+      style: style ? String(style) : undefined,
       limit: limit ? +limit : undefined,
       page: page ? +page : undefined,
     });

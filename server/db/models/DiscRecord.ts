@@ -56,6 +56,7 @@ export interface DiscRecordDocument extends DiscRecord, Document {
 
 type QueryOptions = {
   q?: string;
+  style?: string;
   page?: number;
   limit?: number;
 }
@@ -93,34 +94,35 @@ schema.statics.query = async function(
 ): Promise<Array<DiscRecord>> {
 
   const {
-    q, page=0, limit=20,
+    q='', style, page=0, limit=20,
   } = options;
   const pipeline = [];
   
-  if (q) {
-    const escaped = q.replace(/[-[\]{}()/*+?.\\^$|]/g, '\\$&');
-    const regex = new RegExp(escaped, 'i');
+  if (q || style) {
+    const $match: any = {};
+    
+    const terms = q.split(';');
+    const regexTerms = terms.map((term) => {
+      const escaped = term
+        .trim()
+        .replace(/[-[\]{}()/*+?.\\^$|]/g, '\\$&');
+      return new RegExp(escaped, 'i');
+    });
 
-    pipeline.push(...[
-      {$lookup: {
-        from: TrackModel.collection.name,
-        localField: '_id',
-        foreignField: 'record',
-        as: 'tracks',
-      }},
-      {$match: {
+    if (regexTerms.length) {
+      $match.$and = regexTerms.map(regex => ({
         $or: [
           {artists: regex},
-          {styles: regex},
           {title: regex},
           {label: regex},
-          {'tracks.title': regex},
-        ]
-      }},
-      {$project: {
-        tracks: 0,
-      }}
-    ]);
+        ],
+      }));
+    }
+    if (style) {
+      $match.styles = style;
+    }
+
+    pipeline.push({ $match });
   }
 
   const records: Array<DiscRecord> = await this
