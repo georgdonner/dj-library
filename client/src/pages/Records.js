@@ -8,6 +8,7 @@ export default class Records extends Component {
     super(props);
     this.state = {
       page: props.records ? Math.floor(props.records.length / LIMIT) : -1,
+      total: 0,
     };
   }
 
@@ -24,7 +25,11 @@ export default class Records extends Component {
     });
 
     const res = await fetch('/api/records?' + params.toString());
-    const records = await res.json();
+    const {records, total} = await res.json();
+    this.setState({
+      page: this.state.page + 1,
+      total,
+    });
     return this.props.setRecords((this.props.records || []).concat(records));
   }
 
@@ -49,6 +54,16 @@ export default class Records extends Component {
             </div>
           </Link>
         ))}
+        {this.state.total && this.state.total > this.props.records.length ? (
+          <div className="is-justify-content-center">
+            <button
+              className="button is-dark"
+              onClick={() => this.fetchRecords()}
+            >
+              Load More
+            </button>
+          </div>
+        ) : null}
       </div>
     )
   }

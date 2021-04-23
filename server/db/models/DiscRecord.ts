@@ -54,16 +54,9 @@ export interface DiscRecordDocument extends DiscRecord, Document {
   styles: Types.Array<string>;
 };
 
-type QueryOptions = {
-  q?: string;
-  style?: string;
-  page?: number;
-  limit?: number;
-}
-
 export interface DiscRecordModel extends Model<DiscRecordDocument> {
   populateTracks(id: string): Promise<DiscRecordWithTracks>;
-  query(options: QueryOptions): Promise<Array<DiscRecord>>;
+  query(options: QueryOptions): Promise<QueryResult>;
   formats(): Array<string>;
 };
 
@@ -88,10 +81,22 @@ schema.statics.populateTracks = async function(
   return populated;
 }
 
+type QueryOptions = {
+  q?: string;
+  style?: string;
+  page?: number;
+  limit?: number;
+}
+
+type QueryResult = {
+  records: Array<DiscRecord>;
+  total: number;
+}
+
 schema.statics.query = async function(
   this: Model<DiscRecordDocument>,
   options: QueryOptions,
-): Promise<Array<DiscRecord>> {
+): Promise<QueryResult> {
 
   const {
     q='', style, page=0, limit=20,
@@ -121,12 +126,15 @@ schema.statics.query = async function(
     }
   }
 
-  const records: Array<DiscRecord> = await this
-    .find(match)
-    .skip(limit * page)
-    .limit(limit);
+  const [records, total] = await Promise.all([
+    this.find(match).skip(limit * page).limit(limit),
+    this.countDocuments(match),
+  ]);
 
-  return records;
+  return {
+    records,
+    total,
+  };
 }
 
 schema.statics.formats = () => formats;

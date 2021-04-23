@@ -11,7 +11,7 @@ const router = Router();
 router.get('/records', async (req, res) => {
   const {limit, page, q, style} = req.query;
 
-  const records = await DiscRecordModel
+  const result = await DiscRecordModel
     .query({
       q: q ? String(q) : undefined,
       style: style ? String(style) : undefined,
@@ -19,7 +19,7 @@ router.get('/records', async (req, res) => {
       page: page ? +page : undefined,
     });
 
-  return res.json(records);
+  return res.json(result);
 });
 
 router.get('/record/:recordID', async (req, res) => {
