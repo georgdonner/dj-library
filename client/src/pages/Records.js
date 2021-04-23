@@ -52,7 +52,7 @@ export default class Records extends Component {
           <div className="control is-expanded">
             <input
               className="input" type="text"
-              placeholder="Filter by name, artist or label"
+              placeholder="Filter by name, artist, style or label"
               value={this.state.query}
               onChange={(e) => this.setState({
                 query: e.target.value,

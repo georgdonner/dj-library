@@ -83,7 +83,6 @@ schema.statics.populateTracks = async function(
 
 type QueryOptions = {
   q?: string;
-  style?: string;
   page?: number;
   limit?: number;
 }
@@ -99,11 +98,11 @@ schema.statics.query = async function(
 ): Promise<QueryResult> {
 
   const {
-    q='', style, page=0, limit=20,
+    q='', page=0, limit=20,
   } = options;
   const match: any = {};
   
-  if (q || style) {
+  if (q) {
     const terms = q.split(';');
     const regexTerms = terms.map((term) => {
       const escaped = term
@@ -118,11 +117,9 @@ schema.statics.query = async function(
           {artists: regex},
           {title: regex},
           {label: regex},
+          {styles: regex},
         ],
       }));
-    }
-    if (style) {
-      match.styles = style;
     }
   }
 

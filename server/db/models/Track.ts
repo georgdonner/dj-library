@@ -95,7 +95,6 @@ schema.statics.upsertTracks = async function(
 
 type QueryOptions = {
   q?: string;
-  style?: string;
   bpm?: Array<number>;
   page?: number;
   limit?: number;
@@ -112,7 +111,7 @@ schema.statics.query = async function(
 ): Promise<QueryResult> {
 
   const {
-    q='', style, bpm, page=0, limit=20,
+    q='', bpm, page=0, limit=20,
   } = options;
 
   const pipeline: Array<any> = [
@@ -125,7 +124,7 @@ schema.statics.query = async function(
     {$unwind: '$record'},
   ];
   
-  if (q || style || bpm?.length) {
+  if (q || bpm?.length) {
     const $match: any = {};
     
     const terms = q.split(';');
@@ -143,11 +142,9 @@ schema.statics.query = async function(
           {'record.artists': regex},
           {'record.title': regex},
           {'record.label': regex},
+          {'record.styles': regex},
         ],
       }));
-    }
-    if (style) {
-      $match['record.styles'] = style;
     }
     if (bpm?.length === 2) {
       bpm.sort((a,b) => a - b);
