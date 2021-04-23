@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Switch, Route, NavLink } from 'react-router-dom';
 
+import Record from './pages/Record';
 import Records from './pages/Records';
 
 class App extends Component {
@@ -26,14 +27,17 @@ class App extends Component {
             </div>
           </nav>
     
-          <Switch>
-            <Route path="/">
-              <Records
-                records={this.state.records}
-                setRecords={(records) => this.setState({ records })}
-              />
-            </Route>
-          </Switch>
+          <div className="container my-5">
+            <Switch>
+              <Route path="/record/:id" component={Record} />
+              <Route path="/">
+                <Records
+                  records={this.state.records}
+                  setRecords={(records) => this.setState({ records })}
+                />
+              </Route>
+            </Switch>
+          </div>
         </div>
       </Router>
     );

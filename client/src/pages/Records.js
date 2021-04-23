@@ -43,11 +43,11 @@ export default class Records extends Component {
 
   render() {
     if (! this.props.records) {
-      return <div>Lädt...</div>;
+      return <div>Loading...</div>;
     }
 
     return (
-      <div className="container my-5">
+      <>
         <div className="field has-addons">
           <div className="control is-expanded">
             <input
@@ -96,7 +96,7 @@ export default class Records extends Component {
             </button>
           </div>
         ) : null}
-      </div>
+      </>
     )
   }
 }
