@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { Range } from 'rc-slider';
+import 'rc-slider/assets/index.css';
 
 const LIMIT = 20;
 
@@ -16,6 +18,7 @@ export default class Tracks extends Component {
       page: props.tracks ? Math.floor(props.tracks.length / LIMIT) : -1,
       total: 0,
       query: '',
+      bpm: [0, 250],
     };
   }
 
@@ -32,10 +35,12 @@ export default class Tracks extends Component {
       limit: LIMIT,
       ...(this.state.query ? {q: this.state.query} : {}),
     });
+    if (this.state.bpm) {
+      this.state.bpm.forEach(n => params.append('bpm', n));
+    }
 
     const res = await fetch('/api/tracks?' + params.toString());
     const {tracks, total} = await res.json();
-    console.log(total);
     this.setState({
       page: newPage,
       total,
@@ -76,6 +81,15 @@ export default class Tracks extends Component {
               Search
             </button>
           </div>
+        </div>
+        <div className="is-flex is-align-items-center pr-1">
+          <strong className="mr-5">BPM</strong>
+          <Range
+            min={0} max={250}
+            value={this.state.bpm}
+            onChange={(bpm) => this.setState({ bpm })}
+            marks={this.state.bpm.reduce((a,v) => ({...a, [v]: v}), {})}
+          />
         </div>
         <div className="mt-5">
           {this.props.tracks.map((track) => (
