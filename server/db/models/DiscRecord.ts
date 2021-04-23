@@ -96,11 +96,9 @@ schema.statics.query = async function(
   const {
     q='', style, page=0, limit=20,
   } = options;
-  const pipeline = [];
+  const match: any = {};
   
   if (q || style) {
-    const $match: any = {};
-    
     const terms = q.split(';');
     const regexTerms = terms.map((term) => {
       const escaped = term
@@ -110,7 +108,7 @@ schema.statics.query = async function(
     });
 
     if (regexTerms.length) {
-      $match.$and = regexTerms.map(regex => ({
+      match.$and = regexTerms.map(regex => ({
         $or: [
           {artists: regex},
           {title: regex},
@@ -119,18 +117,14 @@ schema.statics.query = async function(
       }));
     }
     if (style) {
-      $match.styles = style;
+      match.styles = style;
     }
-
-    pipeline.push({ $match });
   }
 
   const records: Array<DiscRecord> = await this
-    .aggregate([
-      ...pipeline,
-      {$skip: limit * page},
-      {$limit: limit},
-    ]);
+    .find(match)
+    .skip(limit * page)
+    .limit(limit);
 
   return records;
 }
