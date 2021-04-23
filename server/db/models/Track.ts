@@ -40,17 +40,9 @@ export interface TrackDocument extends TrackBaseDocument {
   record: DiscRecordDocument['_id'];
 }
 
-type QueryOptions = {
-  q?: string;
-  style?: string;
-  bpm?: Array<number>;
-  page?: number;
-  limit?: number;
-}
-
 export interface TrackModel extends Model<TrackDocument> {
   upsertTracks(recordID: string, tracks: Array<TrackDocument>): Promise<void>;
-  query(options: QueryOptions): Promise<Array<TrackDocument>>;
+  query(options: QueryOptions): Promise<QueryResult>;
 };
 
 schema.statics.upsertTracks = async function(
@@ -101,10 +93,23 @@ schema.statics.upsertTracks = async function(
   }
 }
 
+type QueryOptions = {
+  q?: string;
+  style?: string;
+  bpm?: Array<number>;
+  page?: number;
+  limit?: number;
+}
+
+type QueryResult = {
+  tracks: Array<TrackDocument>;
+  total: number;
+}
+
 schema.statics.query = async function(
   this: Model<TrackDocument>,
   options: QueryOptions,
-): Promise<Array<TrackDocument>> {
+): Promise<QueryResult> {
 
   const {
     q='', style, bpm, page=0, limit=20,
@@ -155,14 +160,22 @@ schema.statics.query = async function(
     pipeline.push({ $match });
   }
 
-  const tracks: Array<TrackDocument> = await this
+  const [{ tracks, total }] = await this
     .aggregate([
       ...pipeline,
-      {$skip: limit * page},
-      {$limit: limit},
+      {$facet: {
+        total: [{ $count: 'count' }],
+        tracks: [
+          {$skip: limit * page},
+          {$limit: limit},
+        ],
+      }},
     ]);
 
-  return tracks;
+  return {
+    tracks,
+    total: total[0].count,
+  };
 }
 
 export default model<TrackDocument, TrackModel>('track', schema);

@@ -3,23 +3,29 @@ import { Link } from 'react-router-dom';
 
 const LIMIT = 20;
 
-export default class Records extends Component {
+const formatSeconds = (seconds) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s < 10 ? `0${s}` : s}`;
+}
+
+export default class Tracks extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      page: props.records ? Math.floor(props.records.length / LIMIT) : -1,
+      page: props.tracks ? Math.floor(props.tracks.length / LIMIT) : -1,
       total: 0,
       query: '',
     };
   }
 
   async componentDidMount() {
-    if (! this.props.records) {
-      this.fetchRecords();
+    if (! this.props.tracks) {
+      this.fetchTracks();
     }
   }
 
-  async fetchRecords(page) {
+  async fetchTracks(page) {
     const newPage = page ?? (this.state.page + 1);
     const params = new URLSearchParams({
       page: newPage,
@@ -27,22 +33,23 @@ export default class Records extends Component {
       ...(this.state.query ? {q: this.state.query} : {}),
     });
 
-    const res = await fetch('/api/records?' + params.toString());
-    const {records, total} = await res.json();
+    const res = await fetch('/api/tracks?' + params.toString());
+    const {tracks, total} = await res.json();
+    console.log(total);
     this.setState({
       page: newPage,
       total,
     });
-    return this.props.setRecords((this.props.records || []).concat(records));
+    return this.props.setTracks((this.props.tracks || []).concat(tracks));
   }
 
   async search() {
-    this.props.setRecords(null);
-    this.fetchRecords(0);
+    this.props.setTracks(null);
+    this.fetchTracks(0);
   }
 
   render() {
-    if (! this.props.records) {
+    if (! this.props.tracks) {
       return <div>Loading...</div>;
     }
 
@@ -52,7 +59,7 @@ export default class Records extends Component {
           <div className="control is-expanded">
             <input
               className="input" type="text"
-              placeholder="Filter by name, artist or label"
+              placeholder="Filter by track name, record name, artist or label"
               value={this.state.query}
               onChange={(e) => this.setState({
                 query: e.target.value,
@@ -71,26 +78,32 @@ export default class Records extends Component {
           </div>
         </div>
         <div className="mt-5">
-          {this.props.records.map((record) => (
-            <Link to={`/record/${record._id}`} key={record._id} className="media" style={{color: 'unset'}}>
+          {this.props.tracks.map((track) => (
+            <Link to={`/record/${track.record._id}`} key={track._id} className="media" style={{color: 'unset'}}>
               <figure className="media-left" style={{ width: '72px' }}>
                 <p className="image is-square">
-                  <img src={record.coverImg} alt={record.title} />
+                  <img src={track.record.coverImg} alt={track.record.title} />
                 </p>
               </figure>
               <div className="media-content">
-                <p><strong>{record.title}</strong></p>
-                <p>{record.artists.join(', ')}</p>
-                <p><small>{record.label} {record.year}</small></p>
+                <p><strong>{track.title}</strong></p>
+                <div className="is-flex is-justify-content-space-between">
+                  <span>{track.record.title}</span>
+                  {track.duration ? <span>{formatSeconds(track.duration)}</span> : null}
+                </div>
+                <div className="is-flex is-justify-content-space-between">
+                  <span>{track.record.artists.join(', ')}</span>
+                  {track.bpm ? <span>{track.bpm} BPM</span> : null}
+                </div>
               </div>
             </Link>
           ))}
         </div>
-        {this.state.total && this.state.total > this.props.records.length ? (
+        {this.state.total && this.state.total > this.props.tracks.length ? (
           <div className="is-justify-content-center mt-5">
             <button
               className="button is-dark"
-              onClick={() => this.fetchRecords()}
+              onClick={() => this.fetchTracks()}
             >
               Load More
             </button>
