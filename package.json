@@ -2,7 +2,6 @@
   "name": "dj-library",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
   "scripts": {
     "start": "node lib/server.js",
     "server": "nodemon --watch 'server/**/*.ts' --exec \"ts-node\" server/app.ts",
