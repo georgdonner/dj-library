@@ -98,7 +98,10 @@ export default () => {
       </table>
 
       {record.notes ? (
-        <p>{record.notes}</p>
+        <div className="content" style={{ whiteSpace: 'pre-wrap' }}>
+          <h3>Notes</h3>
+          <p className="mb-5">{record.notes}</p>
+        </div>
       ) : null}
 
       <span className="icon-text is-clickable mb-4" onClick={() => setShowAdvanced(! showAdvanced)}>
