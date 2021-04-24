@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Switch, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link, NavLink } from 'react-router-dom';
 
+import Import from './pages/Import';
 import Record from './pages/Record';
 import RecordForm from './pages/RecordForm';
 import Records from './pages/Records';
@@ -26,11 +27,26 @@ class App extends Component {
                 <NavLink to="/" exact activeClassName="is-active" className="navbar-item is-tab">Records</NavLink>
                 <NavLink to="/tracks" activeClassName="is-active" className="navbar-item is-tab">Tracks</NavLink>
               </div>
+              <div className="navbar-end">
+                <div className="navbar-item pr-0">
+                  <div className="field is-grouped">
+                    <p className="control">
+                      <Link to="/import" className="button">
+                        <span className="icon">
+                          <i className="fas fa-plus" aria-hidden="true"></i>
+                        </span>
+                        <span>Import Record</span>
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </nav>
     
           <div className="my-5" style={{ maxWidth: '750px', margin: '0 auto' }}>
             <Switch>
+              <Route path="/import" component={Import} />
               <Route path="/edit-record" component={RecordForm} />
               <Route path="/record/:id" component={Record} />
               <Route path="/tracks">
