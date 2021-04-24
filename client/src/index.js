@@ -39,12 +39,13 @@ class App extends Component {
                   setTracks={(tracks) => this.setState({ tracks })}
                 />
               </Route>
-              <Route path="/">
+              <Route path="/" render={(props) => (
                 <Records
                   records={this.state.records}
                   setRecords={(records) => this.setState({ records })}
+                  {...props}
                 />
-              </Route>
+              )} />
             </Switch>
           </div>
         </div>

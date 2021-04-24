@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'React';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 
 const formatSeconds = (seconds) => {
   const m = Math.floor(seconds / 60);
@@ -9,6 +9,8 @@ const formatSeconds = (seconds) => {
 
 export default () => {
   const { id } = useParams();
+  const history = useHistory();
+
   const [record, setRecord] = useState();
   const [spotifyURI, setSpotifyURI] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,6 +44,15 @@ export default () => {
     setSpotifyURI('');
     setRecord(updated);
     setLoading(false);
+  }
+
+  const deleteRecord = async () => {
+    if (window.confirm(`Really delete record ${record.title}?`)) {
+      await fetch(`/api/record/${id}`, {
+        method: 'DELETE',
+      });
+      history.replace('/', { reload: true });
+    }
   }
 
   return (
@@ -98,15 +109,20 @@ export default () => {
       </span>
       {showAdvanced ? (
         <div className="is-flex is-justify-content-space-between">
-          <Link
-            to={{
-              pathname: "/edit-record",
-              state: record,
-            }}
-            className="button is-dark"
-          >
-            Edit
-          </Link>
+          <div>
+            <Link
+              to={{
+                pathname: "/edit-record",
+                state: record,
+              }}
+              className="button is-dark mr-3"
+            >
+              Edit
+            </Link>
+            <button className="button is-danger" onClick={deleteRecord}>
+              Delete
+            </button>
+          </div>
           <div className="field">
             <div className="field has-addons mb-0">
               <div className="control">

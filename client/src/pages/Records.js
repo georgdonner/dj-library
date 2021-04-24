@@ -16,6 +16,8 @@ export default class Records extends Component {
   async componentDidMount() {
     if (! this.props.records) {
       this.fetchRecords();
+    } else if (this.props.location.state.reload) {
+      this.search();
     }
   }
 
