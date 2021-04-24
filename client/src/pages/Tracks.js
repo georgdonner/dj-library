@@ -4,11 +4,16 @@ import { Range } from 'rc-slider';
 import 'rc-slider/assets/index.css';
 
 const LIMIT = 20;
+const DEFAULT_BPM = [0, 250];
 
 const formatSeconds = (seconds) => {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s < 10 ? `0${s}` : s}`;
+}
+
+const isDefaultBpm = (bpm) => {
+  return JSON.stringify(bpm) === JSON.stringify(DEFAULT_BPM);
 }
 
 export default class Tracks extends Component {
@@ -18,7 +23,7 @@ export default class Tracks extends Component {
       page: props.tracks ? Math.floor(props.tracks.length / LIMIT) : -1,
       total: 0,
       query: '',
-      bpm: [0, 250],
+      bpm: DEFAULT_BPM,
     };
   }
 
@@ -35,7 +40,7 @@ export default class Tracks extends Component {
       limit: LIMIT,
       ...(this.state.query ? {q: this.state.query} : {}),
     });
-    if (this.state.bpm) {
+    if (this.state.bpm && ! isDefaultBpm(this.state.bpm)) {
       this.state.bpm.forEach(n => params.append('bpm', n));
     }
 

@@ -171,7 +171,7 @@ schema.statics.query = async function(
 
   return {
     tracks,
-    total: total[0].count,
+    total: total?.length ? total[0].count : 0,
   };
 }
 
