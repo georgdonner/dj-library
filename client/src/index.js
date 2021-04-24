@@ -24,7 +24,18 @@ class App extends Component {
           <nav className="navbar" role="navigation" aria-label="main navigation">
             <div className="navbar-menu">
               <div className="navbar-start">
-                <NavLink to="/" exact activeClassName="is-active" className="navbar-item is-tab">Records</NavLink>
+                <NavLink
+                  to="/" activeClassName="is-active"
+                  className="navbar-item is-tab"
+                  isActive={(match, location) => {
+                    if (location.pathname.startsWith('/record') || location.pathname === '/import') {
+                      return true;
+                    }
+                    return match.isExact;
+                  }}
+                >
+                  Records
+                </NavLink>
                 <NavLink to="/tracks" activeClassName="is-active" className="navbar-item is-tab">Tracks</NavLink>
               </div>
               <div className="navbar-end">
@@ -46,7 +57,9 @@ class App extends Component {
     
           <div className="my-5" style={{ maxWidth: '750px', margin: '0 auto' }}>
             <Switch>
-              <Route path="/import" component={Import} />
+              <Route path="/import">
+                <Import setRecords={(records) => this.setState({ records })} />
+              </Route>
               <Route path="/edit-record" component={RecordForm} />
               <Route path="/record/:id" component={Record} />
               <Route path="/tracks">
