@@ -87,7 +87,7 @@ export default class Tracks extends Component {
             </button>
           </div>
         </div>
-        <div className="is-flex is-align-items-center pr-1">
+        <div className="is-flex is-align-items-center pr-1 mb-6">
           <strong className="mr-5">BPM</strong>
           <Range
             min={0} max={250}
@@ -95,6 +95,7 @@ export default class Tracks extends Component {
             onChange={(bpm) => this.setState({ bpm })}
             marks={this.state.bpm.reduce((a,v) => ({...a, [v]: v}), {})}
           />
+          <span className="ml-5 is-clickable" onClick={() => this.setState({ bpm: DEFAULT_BPM })}>Reset</span>
         </div>
         <div className="mt-5">
           {this.props.tracks.map((track) => (
