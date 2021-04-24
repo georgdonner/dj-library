@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "npm run server",
+    "start": "node lib/server.js",
     "server": "nodemon --watch 'server/**/*.ts' --exec \"ts-node\" server/app.ts",
     "build:server": "tsc -p .",
     "client": "parcel watch client/index.html -d build --no-hmr",
