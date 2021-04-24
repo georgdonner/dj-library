@@ -4,11 +4,13 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "npm run build:live",
-    "build": "tsc -p .",
-    "build:live": "nodemon --watch 'server/**/*.ts' --exec \"ts-node\" server/app.ts",
+    "start": "npm run server",
+    "server": "nodemon --watch 'server/**/*.ts' --exec \"ts-node\" server/app.ts",
+    "build:server": "tsc -p .",
     "client": "parcel watch client/index.html -d build --no-hmr",
-    "build:client": "parcel build client/index.html -d build"
+    "build:client": "parcel build client/index.html -d build",
+    "postinstall": "npm run build:server",
+    "heroku-postbuild": "npm run build:client"
   },
   "keywords": [],
   "author": "",
