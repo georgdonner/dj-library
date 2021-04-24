@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'React';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
 
 const formatSeconds = (seconds) => {
