@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Switch, Route, NavLink } from 'react-router-dom';
 
 import Record from './pages/Record';
+import RecordForm from './pages/RecordForm';
 import Records from './pages/Records';
 import Tracks from './pages/Tracks';
 
@@ -30,6 +31,7 @@ class App extends Component {
     
           <div className="my-5" style={{ maxWidth: '750px', margin: '0 auto' }}>
             <Switch>
+              <Route path="/edit-record" component={RecordForm} />
               <Route path="/record/:id" component={Record} />
               <Route path="/tracks">
                 <Tracks

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'React';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 const formatSeconds = (seconds) => {
   const m = Math.floor(seconds / 60);
@@ -35,6 +35,7 @@ export default () => {
 
           <p><strong>Label:</strong> {record.label}</p>
           {record.format ? <p><strong>Format:</strong> {record.format}</p> : null}
+          {record.discSize ? <p><strong>Disc Size:</strong> {record.discSize} in.</p> : null}
           {record.tempo ? <p><strong>Tempo:</strong> {record.tempo} rpm</p> : null}
           <p><strong>Year:</strong> {record.year}</p>
           <p><strong>Styles:</strong> {record.styles.join(', ')}</p>
@@ -44,10 +45,10 @@ export default () => {
       <table className="table mt-5 is-fullwidth" style={{ maxWidth: '750px' }}>
         <thead>
           <tr>
-            <th>Side</th>
+            <th style={{ width: '1rem' }}>Side</th>
             <th>Title</th>
-            <th>Duration</th>
-            <th>BPM</th>
+            <th style={{ width: '4rem' }}>BPM</th>
+            <th style={{ width: '4rem' }}>Duration</th>
           </tr>
         </thead>
         <tbody>
@@ -55,8 +56,8 @@ export default () => {
             <tr key={track._id}>
               <td>{String.fromCharCode(65 + track.side)}</td>
               <td>{track.title}</td>
-              <td>{formatSeconds(track.duration)}</td>
-              <td>{track.bpm}</td>
+              <td className="has-text-centered">{track.bpm}</td>
+              <td className="has-text-right">{formatSeconds(track.duration)}</td>
             </tr>
           ))}
         </tbody>
@@ -65,6 +66,16 @@ export default () => {
       {record.notes ? (
         <p>{record.notes}</p>
       ) : null}
+
+      <Link
+        to={{
+          pathname: "/edit-record",
+          state: record,
+        }}
+        className="button"
+      >
+        Edit
+      </Link>
     </>
   )
 }

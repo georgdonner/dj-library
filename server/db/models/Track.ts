@@ -75,7 +75,7 @@ schema.statics.upsertTracks = async function(
       });
     }
     else {
-      const { record, ...update } = track.toObject();
+      const { record, ...update } = 'toObject' in track ? track.toObject() : track;
       updates.push(update);
     }
   }
