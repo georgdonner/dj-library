@@ -12,6 +12,7 @@ export default () => {
   const [record, setRecord] = useState();
   const [spotifyURI, setSpotifyURI] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(async () => {
     const res = await fetch(`/api/record/${id}`);
@@ -89,39 +90,47 @@ export default () => {
         <p>{record.notes}</p>
       ) : null}
 
-      <div className="is-flex is-justify-content-space-between">
-        <Link
-          to={{
-            pathname: "/edit-record",
-            state: record,
-          }}
-          className="button is-dark"
-        >
-          Edit
-        </Link>
-        <div className="field">
-          <div className="field has-addons mb-0">
-            <div className="control">
-              <input
-                type="text" placeholder="Spotify URI"
-                className={`input ${invalidInput ? 'is-danger' : 'is-success'}`}
-                value={spotifyURI}
-                onChange={(e) => setSpotifyURI(e.target.value)}
-              />
+      <span className="icon-text is-clickable mb-4" onClick={() => setShowAdvanced(! showAdvanced)}>
+        <span className="icon">
+          <i className={`fas fa-chevron-${showAdvanced ? 'up' : 'down'}`}></i>
+        </span>
+        <span>Advanced</span>
+      </span>
+      {showAdvanced ? (
+        <div className="is-flex is-justify-content-space-between">
+          <Link
+            to={{
+              pathname: "/edit-record",
+              state: record,
+            }}
+            className="button is-dark"
+          >
+            Edit
+          </Link>
+          <div className="field">
+            <div className="field has-addons mb-0">
+              <div className="control">
+                <input
+                  type="text" placeholder="Spotify URI"
+                  className={`input ${invalidInput ? 'is-danger' : 'is-success'}`}
+                  value={spotifyURI}
+                  onChange={(e) => setSpotifyURI(e.target.value)}
+                />
+              </div>
+              <div className="control">
+                <button
+                  className={`button is-success${loading ? ' is-loading' : ''}`}
+                  disabled={! spotifyURI || invalidInput}
+                  onClick={addBpm}
+                >
+                  Add BPM
+                </button>
+              </div>
             </div>
-            <div className="control">
-              <button
-                className={`button is-success${loading ? ' is-loading' : ''}`}
-                disabled={! spotifyURI || invalidInput}
-                onClick={addBpm}
-              >
-                Add BPM
-              </button>
-            </div>
+            {invalidInput ? <p class="help is-danger">Invalid Spotify URI</p> : null}
           </div>
-          {invalidInput ? <p class="help is-danger">Invalid Spotify URI</p> : null}
         </div>
-      </div>
+      ) : null}
     </>
   )
 }
