@@ -1,5 +1,6 @@
 import { Document, Model, Schema, Types, model } from 'mongoose';
 import DiscRecordModel, { DiscRecordDocument } from './DiscRecord';
+import { bpmMatches } from '../../utils';
 
 const schema = new Schema<TrackDocument, TrackModel>({
   title: {
@@ -98,6 +99,7 @@ type QueryOptions = {
   bpm?: Array<number>;
   page?: number;
   limit?: number;
+  extendedBpm: boolean;
 }
 
 type QueryResult = {
@@ -111,7 +113,7 @@ schema.statics.query = async function(
 ): Promise<QueryResult> {
 
   const {
-    q='', bpm, page=0, limit=20,
+    q='', bpm, page=0, limit=20, extendedBpm=false,
   } = options;
 
   const pipeline: Array<any> = [
@@ -148,10 +150,8 @@ schema.statics.query = async function(
     }
     if (bpm?.length === 2) {
       bpm.sort((a,b) => a - b);
-      $match.$and = ($match.$and || []).concat([
-        {bpm: {$gte: bpm[0]}},
-        {bpm: {$lte: bpm[1]}},
-      ]);
+      $match.$and = ($match.$and || [])
+        .concat(bpmMatches(bpm, extendedBpm));
     }
 
     pipeline.push({ $match });

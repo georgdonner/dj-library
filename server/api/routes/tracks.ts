@@ -12,7 +12,7 @@ const parseBpm = (str: any): Array<number> | undefined => {
 }
 
 router.get('/tracks', async (req, res) => {
-  const {limit, page, q, bpm} = req.query;
+  const {limit, page, q, bpm, extendedBpm} = req.query;
 
   const result = await TrackModel
     .query({
@@ -20,6 +20,7 @@ router.get('/tracks', async (req, res) => {
       bpm: parseBpm(bpm),
       limit: limit ? +limit : undefined,
       page: page ? +page : undefined,
+      extendedBpm: Boolean(extendedBpm),
     });
 
   return res.json(result);

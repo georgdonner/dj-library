@@ -24,6 +24,7 @@ export default class Tracks extends Component {
       total: 0,
       query: '',
       bpm: DEFAULT_BPM,
+      extendedBpm: false,
     };
   }
 
@@ -42,6 +43,9 @@ export default class Tracks extends Component {
     });
     if (this.state.bpm && ! isDefaultBpm(this.state.bpm)) {
       this.state.bpm.forEach(n => params.append('bpm', n));
+      if (this.state.extendedBpm) {
+        params.append('extendedBpm', 'y');
+      }
     }
 
     const res = await fetch('/api/tracks?' + params.toString());
@@ -87,7 +91,7 @@ export default class Tracks extends Component {
             </button>
           </div>
         </div>
-        <div className="is-flex is-align-items-center pr-1 mb-6">
+        <div className="is-flex is-align-items-center pr-1">
           <strong className="mr-5">BPM</strong>
           <Range
             min={0} max={250}
@@ -96,6 +100,15 @@ export default class Tracks extends Component {
             marks={this.state.bpm.reduce((a,v) => ({...a, [v]: v}), {})}
           />
           <span className="ml-5 is-clickable" onClick={() => this.setState({ bpm: DEFAULT_BPM })}>Reset</span>
+        </div>
+        <div className="mt-5 mb-6">
+          <label className="checkbox">
+            <input
+              className="mr-2" type="checkbox" checked={this.state.extendedBpm}
+              onChange={(e) => this.setState({ extendedBpm: e.target.checked })}
+            />
+            Include half/double BPM
+          </label>
         </div>
         <div className="mt-5">
           {this.props.tracks.map((track) => (
