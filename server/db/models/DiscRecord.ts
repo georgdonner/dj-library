@@ -124,7 +124,7 @@ schema.statics.query = async function(
   }
 
   const [records, total] = await Promise.all([
-    this.find(match).skip(limit * page).limit(limit),
+    this.find(match).sort('artists').skip(limit * page).limit(limit),
     this.countDocuments(match),
   ]);
 

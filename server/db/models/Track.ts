@@ -160,6 +160,9 @@ schema.statics.query = async function(
   const [{ tracks, total }] = await this
     .aggregate([
       ...pipeline,
+      {$sort: {
+        'record.artists': 1,
+      }},
       {$facet: {
         total: [{ $count: 'count' }],
         tracks: [
