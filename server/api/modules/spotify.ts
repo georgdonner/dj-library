@@ -101,7 +101,14 @@ export default class Spotify {
         const feature = features.find((feature: any) => feature.id === spotifyID);
 
         if (feature) {
-          Object.assign(track, {bpm: Math.round(feature.tempo)})
+          Object.assign(track, {
+            bpm: Math.round(feature.tempo),
+          });
+          if (! track.duration) {
+            Object.assign(track, {
+              duration: Math.round(feature.duration_ms / 1000),
+            });
+          }
         }
 
         return track;
