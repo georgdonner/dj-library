@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Range } from 'rc-slider';
 import 'rc-slider/assets/index.css';
 
-const LIMIT = 20;
+const LIMIT = 30;
 const DEFAULT_BPM = [0, 250];
 
 const formatSeconds = (seconds) => {
@@ -20,8 +20,7 @@ export default class Tracks extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      page: props.tracks ? Math.floor(props.tracks.length / LIMIT) : -1,
-      total: 0,
+      page: props.tracks.items ? Math.floor(props.tracks.items.length / LIMIT) : -1,
       query: '',
       bpm: DEFAULT_BPM,
       extendedBpm: false,
@@ -29,7 +28,7 @@ export default class Tracks extends Component {
   }
 
   async componentDidMount() {
-    if (! this.props.tracks) {
+    if (! this.props.tracks.items) {
       this.fetchTracks();
     }
   }
@@ -52,18 +51,22 @@ export default class Tracks extends Component {
     const {tracks, total} = await res.json();
     this.setState({
       page: newPage,
-      total,
     });
-    return this.props.setTracks((this.props.tracks || []).concat(tracks));
+    return this.props.setTracks({
+      total,
+      items: (this.props.tracks.items || []).concat(tracks),
+    });
   }
 
   async search() {
-    this.props.setTracks(null);
+    this.props.setTracks({ items: null, total: 0 });
     this.fetchTracks(0);
   }
 
   render() {
-    if (! this.props.tracks) {
+    const { items: tracks, total } = this.props.tracks;
+
+    if (! tracks) {
       return <div>Loading...</div>;
     }
 
@@ -111,7 +114,7 @@ export default class Tracks extends Component {
           </label>
         </div>
         <div className="mt-5">
-          {this.props.tracks.map((track) => (
+          {tracks.map((track) => (
             <Link to={`/record/${track.record._id}`} key={track._id} className="media" style={{color: 'unset'}}>
               <figure className="media-left" style={{ width: '72px' }}>
                 <p className="image is-square">
@@ -132,14 +135,21 @@ export default class Tracks extends Component {
             </Link>
           ))}
         </div>
-        {this.state.total && this.state.total > this.props.tracks.length ? (
-          <div className="is-justify-content-center mt-5">
+        {total && total > tracks.length ? (
+          <div className="is-flex is-justify-content-center mt-5">
             <button
               className="button is-dark"
               onClick={() => this.fetchTracks()}
             >
               Load More
             </button>
+          </div>
+        ) : null}
+        {total ? (
+          <div className="is-flex is-justify-content-center mt-5">
+            <span className="">
+              Displaying <strong>{tracks.length}</strong> of total <strong>{total}</strong> results
+            </span>
           </div>
         ) : null}
       </>

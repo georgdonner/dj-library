@@ -12,8 +12,14 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      records: null,
-      tracks: null,
+      records: {
+        total: 0,
+        items: null,
+      },
+      tracks: {
+        total: 0,
+        items: null,
+      },
     };
   }
 
@@ -58,7 +64,7 @@ class App extends Component {
           <div className="my-5" style={{ maxWidth: '750px', margin: '0 auto' }}>
             <Switch>
               <Route path="/import">
-                <Import setRecords={(records) => this.setState({ records })} />
+                <Import resetRecords={() => this.setState({ records: { items: null, total: 0 } })} />
               </Route>
               <Route path="/edit-record" component={RecordForm} />
               <Route path="/record/:id" component={Record} />

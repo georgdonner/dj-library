@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default ({ setRecords }) => {
+export default ({ resetRecords }) => {
   const [releaseURL, setReleaseURL] = useState('');
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState();
@@ -23,7 +23,7 @@ export default ({ setRecords }) => {
       if (! inserted) {
         throw new Error('Import failed');
       }
-      setRecords(null); // reset currently displayed records list
+      resetRecords();
       setNotification({
         type: 'success',
         message: `${inserted.title} successfully imported with ${inserted.tracks.length} tracks`,

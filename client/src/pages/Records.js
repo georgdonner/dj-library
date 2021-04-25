@@ -1,20 +1,19 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
-const LIMIT = 20;
+const LIMIT = 30;
 
 export default class Records extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      page: props.records ? Math.floor(props.records.length / LIMIT) : -1,
-      total: 0,
+      page: props.records.items ? Math.floor(props.records.items.length / LIMIT) : -1,
       query: '',
     };
   }
 
   async componentDidMount() {
-    if (! this.props.records) {
+    if (! this.props.records.items) {
       this.fetchRecords();
     } else if (this.props.location.state?.reload) {
       this.search();
@@ -33,18 +32,22 @@ export default class Records extends Component {
     const {records, total} = await res.json();
     this.setState({
       page: newPage,
-      total,
     });
-    return this.props.setRecords((this.props.records || []).concat(records));
+    return this.props.setRecords({
+      total,
+      items: (this.props.records.items || []).concat(records)
+    });
   }
 
   async search() {
-    this.props.setRecords(null);
+    this.props.setRecords({ items: null, total: 0 });
     this.fetchRecords(0);
   }
 
   render() {
-    if (! this.props.records) {
+    const {items: records, total} = this.props.records;
+
+    if (! records) {
       return <div>Loading...</div>;
     }
 
@@ -73,7 +76,7 @@ export default class Records extends Component {
           </div>
         </div>
         <div className="mt-5">
-          {this.props.records.map((record) => (
+          {records.map((record) => (
             <Link to={`/record/${record._id}`} key={record._id} className="media" style={{color: 'unset'}}>
               <figure className="media-left" style={{ width: '72px' }}>
                 <p className="image is-square">
@@ -88,14 +91,21 @@ export default class Records extends Component {
             </Link>
           ))}
         </div>
-        {this.state.total && this.state.total > this.props.records.length ? (
-          <div className="is-justify-content-center mt-5">
+        {total && total > records.length ? (
+          <div className="is-flex is-justify-content-center mt-5">
             <button
               className="button is-dark"
               onClick={() => this.fetchRecords()}
             >
               Load More
             </button>
+          </div>
+        ) : null}
+        {total ? (
+          <div className="is-flex is-justify-content-center mt-5">
+            <span className="">
+              Displaying <strong>{records.length}</strong> of total <strong>{total}</strong> results
+            </span>
           </div>
         ) : null}
       </>
