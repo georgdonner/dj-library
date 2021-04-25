@@ -62,7 +62,7 @@ export default class Discogs {
       tracks,
       label: release.labels[0].name,
       year: release.year,
-      coverImg: release.images[0].uri,
+      coverImg: release.images ? release.images[0].uri : undefined,
       styles: release.styles,
     };
 
