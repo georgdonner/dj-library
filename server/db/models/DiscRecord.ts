@@ -98,7 +98,7 @@ schema.statics.query = async function(
 ): Promise<QueryResult> {
 
   const {
-    q='', page=0, limit=20,
+    q='', page=0, limit=30,
   } = options;
   const match: any = {};
   
@@ -135,5 +135,7 @@ schema.statics.query = async function(
 }
 
 schema.statics.formats = () => formats;
+
+schema.index({ artists: 1 });
 
 export default model<DiscRecordDocument, DiscRecordModel>('discrecord', schema);
